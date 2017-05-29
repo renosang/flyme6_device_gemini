@@ -9,7 +9,7 @@ def ModifyBegin(info):
 ui_print("******************************************");
 ui_print("* Flyme6 for Mi-5(gemini)");
 ui_print("*");
-ui_print("* Romer: Liberation");
+ui_print("* Romer: DroidVnTeam");
 ui_print("******************************************");\n''' + edify.script[0]
 
 def InstallBased(info):
@@ -48,3 +48,18 @@ package_extract_file("firmware-update/BTFM.bin", "/dev/block/bootdevice/by-name/
 def FullOTA_InstallEnd(info):
     ModifyBegin(info)
     InstallBased(info)
+
+def InstallSuperSU(info):
+    droidvnteam = info.input_zip.read("META/UPDATE-SuperSU.zip")
+    common.ZipWriteStr(info.output_zip, "SuperSU/UPDATE-SuperSU.zip", droidvnteam)
+
+def FlashSUperSU(info):
+    info.script.AppendExtra(('ui_print("Flashing SuperSU...");'))
+    info.script.AppendExtra(('package_extract_dir("SuperSU", "/tmp/supersu");'))
+    info.script.AppendExtra(('run_program("/sbin/busybox", "unzip", "/tmp/supersu/UPDATE-SuperSU.zip", "META-INF/com/google/android/*", "-d", "/tmp/supersu");'))
+    info.script.AppendExtra(('run_program("/sbin/busybox", "sh", "/tmp/supersu/META-INF/com/google/android/update-binary", "dummy", "1", "/tmp/supersu/UPDATE-SuperSU.zip");'))
+    info.script.AppendExtra(('ui_print("Finish!");'))
+
+def FullOTA_InstallEnd(info):
+    InstallSuperSU(info)
+    FlashSUperSU(info)
